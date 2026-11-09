@@ -18,6 +18,9 @@ Experimental prototype. The document engine has been through eleven independent 
 ```powershell
 python -m pip install -e .
 sangate version
+
+# If build isolation cannot reach PyPI, use the already-installed setuptools:
+python -m pip install -e . --no-build-isolation
 ```
 
 ## Quick start
