@@ -491,6 +491,203 @@
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
   }
+  /* easyreview xuan-ink theme: paper, ink, mineral accents, one radius */
+  :root {
+    --paper: #1b1e22;
+    --paper-2: #1b1e22;
+    --card: #282d32;
+    --ink: #e6ded0;
+    --muted: #b9b9af;
+    --green: #a7bcb3;
+    --green-soft: #24302c;
+    --sand: #ccbba0;
+    --sand-soft: #332e26;
+    --clay: #dca49a;
+    --clay-soft: #342826;
+    --blue: #9fb6c2;
+    --blue-soft: #263238;
+    --purple: #b9a9c9;
+    --purple-soft: #2e2934;
+    --border: #4e5a63;
+    --radius: 10px;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .22);
+  }
+
+  body { background: var(--paper); color: var(--ink); }
+
+  body::before {
+    opacity: .5;
+    background-image:
+      url("./xuan-paper.svg"),
+      radial-gradient(ellipse at 10% 0%, rgba(204, 187, 160, .07), transparent 58%);
+    background-size: 160px 160px, 100% 720px;
+    background-repeat: repeat, no-repeat;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    right: -40px;
+    bottom: -34px;
+    width: 360px;
+    height: 170px;
+    pointer-events: none;
+    background: var(--ink);
+    mask: url("./xuan-wash.svg") center / contain no-repeat;
+    opacity: .10;
+    transform: rotate(180deg);
+  }
+
+  .topbar { background: rgba(27, 30, 34, .92); border-bottom-color: var(--border); }
+  .rail { background: rgba(27, 30, 34, .55); border-right-color: var(--border); }
+  .rail-kicker { color: var(--sand); }
+  .brief { background: var(--card); border-color: var(--border); }
+  .brief h2 { color: var(--ink); }
+  .brief p { color: var(--muted); }
+  .rail-quote { color: var(--green); }
+  h1 { color: var(--ink); font-family: "Noto Serif SC", "Songti SC", Georgia, serif; }
+  h1::after {
+    content: "";
+    display: block;
+    width: 5rem;
+    height: 4px;
+    margin-top: 9px;
+    opacity: .55;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--green), rgba(167, 188, 179, .08));
+  }
+  .subtitle, .canvas-head, .hint, .statusbar { color: var(--muted); }
+  .canvas-head strong { color: var(--ink); font-family: "Noto Serif SC", "Songti SC", Georgia, serif; }
+
+  .btn { background: var(--card); color: var(--ink); border-color: var(--border); }
+  .btn:hover { background: #30373c; border-color: var(--sand); }
+  .btn--primary { background: var(--green); color: var(--paper); border-color: var(--green); }
+  .btn--primary:hover { background: #b6c9c0; border-color: #b6c9c0; }
+  .btn--danger { color: var(--clay); }
+
+  .canvas-scroll { background: var(--paper-2); border-color: var(--border); }
+  .canvas {
+    background-color: var(--paper-2);
+    background-image:
+      linear-gradient(rgba(230, 222, 208, .045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(230, 222, 208, .045) 1px, transparent 1px);
+    border-color: var(--border);
+  }
+  .group { background: rgba(40, 45, 50, .22); border-color: var(--border); }
+  .group-label { background: var(--paper-2); color: var(--muted); }
+  .node { background: var(--card); border-color: var(--border); box-shadow: 0 2px 0 rgba(0, 0, 0, .12); }
+  .node:hover { box-shadow: 0 10px 26px rgba(0, 0, 0, .28); }
+  .node-title { color: var(--ink); }
+  .node-body { color: var(--muted); }
+  .node--blue { border-color: var(--blue); }
+  .node--blue .node-title { color: var(--blue); }
+  .node--teal { border-color: var(--green); }
+  .node--teal .node-title { color: var(--green); }
+  .node--red { border-color: var(--clay); }
+  .node--red .node-title { color: var(--clay); }
+  .node--purple { border-color: var(--purple); }
+  .node--purple .node-title { color: var(--purple); }
+  .node--sand { border-color: var(--sand); }
+  .node--sand .node-title { color: var(--sand); }
+  .node--output { background: var(--green-soft); border-color: var(--green); }
+  .node--output .node-title { color: var(--green); }
+  .node-badge { background: var(--green); color: var(--paper); }
+  .port { background: var(--card); border-color: var(--green); }
+
+  .note {
+    background: #332e26;
+    border-color: var(--sand);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .26);
+  }
+  .note-head { color: var(--sand); border-bottom-color: rgba(204, 187, 160, .35); }
+  .note-del { color: var(--sand); }
+  .note-del:hover { background: rgba(204, 187, 160, .12); }
+  .note-body { color: var(--ink); }
+  .note-body:empty::before { color: rgba(230, 222, 208, .42); }
+
+  .toast { background: #30373c; color: var(--ink); border-color: var(--border); }
+
+  .text-annotation {
+    background: rgba(204, 187, 160, .22);
+    border-bottom: 1px solid var(--sand);
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0 1px;
+  }
+  .text-annotation:hover { background: rgba(204, 187, 160, .36); }
+
+  .text-toolbar {
+    position: fixed;
+    z-index: 70;
+    display: none;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #30373c;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
+  }
+  .text-toolbar.show { display: block; }
+  .text-toolbar button {
+    border: 0;
+    border-radius: 6px;
+    padding: 5px 9px;
+    background: var(--green);
+    color: var(--paper);
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+
+  .annotation-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: none;
+    place-items: center;
+    background: rgba(10, 12, 14, .55);
+    backdrop-filter: blur(3px);
+  }
+  .annotation-dialog.show { display: grid; }
+  .dialog-card {
+    width: min(480px, calc(100vw - 32px));
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .42);
+  }
+  .dialog-kicker { color: var(--sand); font-size: 11px; letter-spacing: .12em; margin-bottom: 8px; }
+  .dialog-quote {
+    margin: 0 0 12px;
+    padding: 9px 11px;
+    border-left: 2px solid var(--sand);
+    color: var(--muted);
+    background: rgba(204, 187, 160, .06);
+    font-size: 12px;
+    line-height: 1.55;
+    max-height: 96px;
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+  .dialog-card textarea {
+    width: 100%;
+    min-height: 104px;
+    resize: vertical;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 12.5px;
+    line-height: 1.55;
+    outline: none;
+  }
+  .dialog-card textarea:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(167, 188, 179, .16); }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  .dialog-actions .btn { padding: 6px 11px; font-size: 12px; }
+  .dialog-actions .btn--danger { margin-right: auto; }
+
+  ::selection { background: rgba(167, 188, 179, .35); color: var(--ink); }
+
 </style>
 </head>
 <body>
@@ -554,7 +751,7 @@
   <main class="workspace">
     <div class="canvas-head">
       <div><strong>运行时 + 离线重工作</strong>　·　拖动节点重排；从节点右侧圆点拖到另一个节点即可连线</div>
-      <div class="hint">双击节点文字编辑 · 双击连线删除 · 右键连线切换线型</div>
+      <div class="hint">双击节点文字编辑 · 选中文字可批注 · 双击连线删除 · 右键切换线型</div>
     </div>
 
     <div class="canvas-scroll">
@@ -571,6 +768,23 @@
       <span id="counts"></span>
     </div>
   </main>
+</div>
+
+<div class="text-toolbar" id="textToolbar">
+  <button id="annotateSelection">批注选中文字</button>
+</div>
+
+<div class="annotation-dialog" id="annotationDialog">
+  <div class="dialog-card">
+    <div class="dialog-kicker">文字批注</div>
+    <blockquote class="dialog-quote" id="annotationQuote"></blockquote>
+    <textarea id="annotationText" placeholder="写批注…"></textarea>
+    <div class="dialog-actions">
+      <button class="btn btn--danger" id="annotationDelete">删除</button>
+      <button class="btn" id="annotationCancel">取消</button>
+      <button class="btn btn--primary" id="annotationSave">保存</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -628,7 +842,8 @@
       { id: "e-eval-artifact", from: "eval", to: "artifact", type: "solid", label: "发布" },
       { id: "e-blue-red", from: "blue", to: "red", type: "red", label: "下一批" }
     ],
-    notes: []
+    notes: [],
+    textAnnotations: []
   };
 
   const canvas = document.getElementById("canvas");
@@ -639,6 +854,10 @@
   const statusEl = document.getElementById("status");
   const countsEl = document.getElementById("counts");
   const toastEl = document.getElementById("toast");
+  const textToolbar = document.getElementById("textToolbar");
+  const annotationDialog = document.getElementById("annotationDialog");
+  const annotationQuote = document.getElementById("annotationQuote");
+  const annotationText = document.getElementById("annotationText");
 
   let state = loadState();
   let canvasZoom = 1;
@@ -648,6 +867,8 @@
   let drawingEdge = null;
   let noteMode = false;
   let toastTimer = null;
+  let pendingSelection = null;
+  let editingAnnotation = null;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -665,7 +886,8 @@
         groups: Array.isArray(parsed.groups) ? parsed.groups : clone(DEFAULT_STATE.groups),
         nodes: parsed.nodes,
         edges: parsed.edges,
-        notes: Array.isArray(parsed.notes) ? parsed.notes : []
+        notes: Array.isArray(parsed.notes) ? parsed.notes : [],
+        textAnnotations: Array.isArray(parsed.textAnnotations) ? parsed.textAnnotations : []
       };
     } catch (err) {
       return clone(DEFAULT_STATE);
@@ -690,7 +912,7 @@
   }
 
   function updateCounts() {
-    countsEl.textContent = `${state.nodes.length} 节点 · ${state.edges.length} 连线 · ${state.notes.length} 批注`;
+    countsEl.textContent = `${state.nodes.length} 节点 · ${state.edges.length} 连线 · ${state.notes.length} 画布批注 · ${state.textAnnotations.length} 文字批注`;
   }
 
   function nodeById(id) {
@@ -703,6 +925,178 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function sanitizeBodyHtml(html) {
+    const template = document.createElement("template");
+    template.innerHTML = String(html || "");
+    const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+    const elements = [];
+    while (walker.nextNode()) elements.push(walker.currentNode);
+    for (const element of elements) {
+      if (element.tagName === "BR") continue;
+      if (element.tagName === "SPAN" && element.classList.contains("text-annotation")) {
+        for (const attr of Array.from(element.attributes)) {
+          if (attr.name !== "class" && attr.name !== "data-annotation-id") {
+            element.removeAttribute(attr.name);
+          }
+        }
+        continue;
+      }
+      element.replaceWith(...Array.from(element.childNodes));
+    }
+    return template.innerHTML;
+  }
+
+  function bodyMarkup(node) {
+    if (node.bodyHtml) return sanitizeBodyHtml(node.bodyHtml);
+    return escapeHtml(node.body || "").replace(/\n/g, "<br>");
+  }
+
+  function hideTextToolbar() {
+    textToolbar.classList.remove("show");
+  }
+
+  function showTextToolbar(range) {
+    const rect = range.getBoundingClientRect();
+    if (!rect || (!rect.width && !rect.height)) return;
+    const width = 112;
+    textToolbar.style.left = `${Math.max(8, Math.min(window.innerWidth - width - 8, rect.left + rect.width / 2 - width / 2))}px`;
+    textToolbar.style.top = `${Math.max(8, rect.top - 38)}px`;
+    textToolbar.classList.add("show");
+  }
+
+  function selectedTextTarget() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+    const range = selection.getRangeAt(0);
+    if (!String(range.toString() || "").trim()) return null;
+    const container = range.commonAncestorContainer;
+    const element = container.nodeType === Node.TEXT_NODE ? container.parentElement : container;
+    const textEl = element ? element.closest(".node-title, .node-body") : null;
+    if (!textEl) return null;
+    const nodeEl = textEl.closest(".node");
+    if (!nodeEl) return null;
+    return { range, textEl, nodeEl };
+  }
+
+  function persistNodeHtml(nodeId) {
+    const nodeEl = nodesEl.querySelector(`.node[data-id="${nodeId}"]`);
+    if (!nodeEl) return;
+    const bodyEl = nodeEl.querySelector(".node-body");
+    const node = nodeById(nodeId);
+    if (!bodyEl || !node) return;
+    node.body = bodyEl.innerText.replace(/\n{3,}/g, "\n\n").trim();
+    node.bodyHtml = sanitizeBodyHtml(bodyEl.innerHTML);
+  }
+
+  function unwrapSpan(span) {
+    if (!span || !span.parentNode) return;
+    span.replaceWith(...Array.from(span.childNodes));
+  }
+
+  function closeAnnotationDialog(cancel) {
+    if (cancel && editingAnnotation && editingAnnotation.isNew) {
+      unwrapSpan(editingAnnotation.span);
+      persistNodeHtml(editingAnnotation.nodeId);
+    }
+    annotationDialog.classList.remove("show");
+    editingAnnotation = null;
+    annotationText.value = "";
+    annotationQuote.textContent = "";
+  }
+
+  function openAnnotationDialog(config) {
+    editingAnnotation = config;
+    annotationQuote.textContent = config.quote || "";
+    annotationText.value = config.comment || "";
+    annotationDialog.classList.add("show");
+    window.setTimeout(() => annotationText.focus(), 20);
+  }
+
+  function beginTextAnnotation() {
+    if (!pendingSelection) return;
+    const { range, textEl, nodeEl } = pendingSelection;
+    const quote = String(range.toString() || "").trim();
+    if (!quote) return;
+    const span = document.createElement("span");
+    span.className = "text-annotation";
+    span.dataset.annotationId = `ta-${Date.now()}`;
+    try {
+      range.surroundContents(span);
+    } catch (err) {
+      toast("请在同一段文字内选择");
+      return;
+    }
+    hideTextToolbar();
+    persistNodeHtml(nodeEl.dataset.id);
+    openAnnotationDialog({
+      isNew: true,
+      id: span.dataset.annotationId,
+      nodeId: nodeEl.dataset.id,
+      field: textEl.dataset.field,
+      quote,
+      comment: "",
+      span
+    });
+  }
+
+  function openExistingAnnotation(span) {
+    const id = span.dataset.annotationId;
+    const annotation = state.textAnnotations.find((entry) => entry.id === id);
+    if (!annotation) return;
+    const nodeEl = span.closest(".node");
+    if (!nodeEl) return;
+    openAnnotationDialog({
+      isNew: false,
+      id,
+      nodeId: nodeEl.dataset.id,
+      field: annotation.field,
+      quote: annotation.quote,
+      comment: annotation.comment,
+      span
+    });
+  }
+
+  function saveTextAnnotation() {
+    if (!editingAnnotation) return;
+    const comment = annotationText.value.trim();
+    if (!comment) {
+      toast("批注不能为空");
+      annotationText.focus();
+      return;
+    }
+    if (editingAnnotation.isNew) {
+      state.textAnnotations.push({
+        id: editingAnnotation.id,
+        nodeId: editingAnnotation.nodeId,
+        field: editingAnnotation.field,
+        quote: editingAnnotation.quote,
+        comment
+      });
+    } else {
+      const existing = state.textAnnotations.find((entry) => entry.id === editingAnnotation.id);
+      if (existing) existing.comment = comment;
+    }
+    persistNodeHtml(editingAnnotation.nodeId);
+    annotationDialog.classList.remove("show");
+    editingAnnotation = null;
+    updateCounts();
+    saveState("文字批注已保存");
+  }
+
+  function deleteTextAnnotation() {
+    if (!editingAnnotation) return;
+    const { id, span, nodeId, isNew } = editingAnnotation;
+    if (!isNew) {
+      state.textAnnotations = state.textAnnotations.filter((entry) => entry.id !== id);
+    }
+    unwrapSpan(span);
+    persistNodeHtml(nodeId);
+    annotationDialog.classList.remove("show");
+    editingAnnotation = null;
+    updateCounts();
+    saveState(isNew ? "已取消批注" : "文字批注已删除");
   }
 
   function portPoint(node, side) {
@@ -756,7 +1150,7 @@
           <span class="port out" data-port="out" title="从这里拖到另一个节点"></span>
           ${badge}
           <div class="node-title" data-field="title">${escapeHtml(node.title)}</div>
-          <div class="node-body" data-field="body">${escapeHtml(node.body)}</div>
+          <div class="node-body" data-field="body">${bodyMarkup(node)}</div>
         </div>
       `;
     }).join("");
@@ -949,6 +1343,8 @@
   // Pointer interactions
   canvas.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
+    hideTextToolbar();
+    pendingSelection = null;
 
     if (noteMode) {
       addNoteAt(canvasPoint(event));
@@ -965,7 +1361,7 @@
     }
 
     const node = event.target.closest(".node");
-    if (node && !event.target.closest("[contenteditable='true'], .port.in")) {
+    if (node && !event.target.closest("[contenteditable='true'], .port.in, .text-annotation")) {
       beginNodeDrag(node, event);
       return;
     }
@@ -1071,10 +1467,47 @@
     if (!node) return;
     const field = text.dataset.field;
     if (field === "title") node.title = text.innerText.trim() || "未命名节点";
-    if (field === "body") node.body = text.innerText.replace(/\n{3,}/g, "\n\n").trim();
+    if (field === "body") {
+      node.body = text.innerText.replace(/\n{3,}/g, "\n\n").trim();
+      node.bodyHtml = sanitizeBodyHtml(text.innerHTML);
+    }
     text.setAttribute("contenteditable", "false");
     saveState("节点文字已保存");
   }, true);
+
+  // Inline text annotations
+  document.addEventListener("mouseup", (event) => {
+    if (event.target.closest("#textToolbar, #annotationDialog")) return;
+    window.setTimeout(() => {
+      const target = selectedTextTarget();
+      if (!target) {
+        pendingSelection = null;
+        hideTextToolbar();
+        return;
+      }
+      pendingSelection = target;
+      showTextToolbar(target.range);
+    }, 0);
+  });
+
+  textToolbar.addEventListener("mousedown", (event) => event.preventDefault());
+
+  document.getElementById("annotateSelection").addEventListener("click", beginTextAnnotation);
+  document.getElementById("annotationSave").addEventListener("click", saveTextAnnotation);
+  document.getElementById("annotationCancel").addEventListener("click", () => closeAnnotationDialog(true));
+  document.getElementById("annotationDelete").addEventListener("click", deleteTextAnnotation);
+
+  annotationDialog.addEventListener("pointerdown", (event) => {
+    if (event.target === annotationDialog) closeAnnotationDialog(true);
+  });
+
+  nodesEl.addEventListener("click", (event) => {
+    const annotation = event.target.closest(".text-annotation");
+    if (annotation) {
+      event.stopPropagation();
+      openExistingAnnotation(annotation);
+    }
+  });
 
   // Notes editing / deletion
   notesEl.addEventListener("input", (event) => {
@@ -1151,7 +1584,8 @@
           groups: Array.isArray(parsed.groups) ? parsed.groups : clone(DEFAULT_STATE.groups),
           nodes: parsed.nodes,
           edges: parsed.edges,
-          notes: Array.isArray(parsed.notes) ? parsed.notes : []
+          notes: Array.isArray(parsed.notes) ? parsed.notes : [],
+          textAnnotations: Array.isArray(parsed.textAnnotations) ? parsed.textAnnotations : []
         };
         selectedEdge = null;
         renderAll();

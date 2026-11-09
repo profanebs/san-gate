@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 200">
+  <defs><filter id="b" x="-20%" y="-30%" width="140%" height="160%"><feGaussianBlur stdDeviation="6"/></filter><linearGradient id="i" x2=".15" y2="1"><stop stop-color="white" stop-opacity=".7"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs>
+  <g fill="url(#i)" filter="url(#b)"><path d="M65 0h375v125c-39-8-33-30-70-18-20 7-39-17-65-32-25-14-30 19-58 8-31-13-33-44-66-35-39 10-53-22-116-48Z"/><ellipse cx="343" cy="45" rx="81" ry="60" opacity=".5"/></g>
+  <g stroke="white" stroke-width="1" opacity=".14"><path d="m226 20 66 11 46-5 83 14M269 49l70 3 54 15M322 81l26-8 49 14"/></g>
+</svg>
