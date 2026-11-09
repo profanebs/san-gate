@@ -1,0 +1,1207 @@
+<!doctype html>
+<!-- impeccable-disable cream-palette: xuan-ink paper palette is the project's visual anchor -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>san-gate 安全审查罐头 · 交互架构</title>
+<style>
+  :root {
+    --paper: #e9e5d9;
+    --paper-2: #f4f0e5;
+    --card: #fbf8ef;
+    --ink: #343d34;
+    --muted: #596055;
+    --green: #4c6651;
+    --green-soft: #eef4e8;
+    --sand: #7b6042;
+    --sand-soft: #f7efe1;
+    --clay: #a44f43;
+    --clay-soft: #f6e4df;
+    --blue: #4f6b7a;
+    --blue-soft: #e8f0f2;
+    --purple: #6b5b7a;
+    --purple-soft: #f0ebf4;
+    --border: #c7c5b5;
+    --radius: 10px;
+    --shadow: 0 8px 22px rgba(52, 61, 52, .08);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--paper);
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .35;
+    background-image:
+      radial-gradient(rgba(76, 102, 81, .07) 1px, transparent 1px),
+      radial-gradient(rgba(123, 96, 66, .05) 1px, transparent 1px);
+    background-size: 19px 19px, 31px 31px;
+    background-position: 0 0, 9px 13px;
+  }
+
+  button, input, textarea { font: inherit; }
+  button { cursor: pointer; }
+
+  .topbar {
+    position: relative;
+    z-index: 10;
+    height: 82px;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(244, 240, 229, .92);
+    backdrop-filter: blur(8px);
+  }
+
+  .brand { display: flex; align-items: center; gap: 14px; min-width: 320px; }
+
+  .mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--green);
+    color: var(--paper-2);
+    font-family: Georgia, "Noto Serif SC", serif;
+    font-size: 17px;
+    letter-spacing: .04em;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+
+  .subtitle {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size: 12.5px;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+
+  .btn:hover { background: #fffdf5; border-color: var(--sand); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--sand); outline-offset: 2px; }
+
+  .btn--primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--paper-2);
+  }
+
+  .btn--primary:hover { background: #3e5544; border-color: #3e5544; }
+
+  .btn--danger { color: var(--clay); }
+
+  .layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 332px minmax(0, 1fr);
+    height: calc(100vh - 82px);
+  }
+
+  .rail {
+    overflow: auto;
+    padding: 20px 18px 28px;
+    border-right: 1px solid var(--border);
+    background: rgba(244, 240, 229, .72);
+  }
+
+  .rail-kicker {
+    color: var(--sand);
+    font-size: 12px;
+    letter-spacing: .14em;
+    margin: 2px 0 12px 2px;
+  }
+
+  .brief {
+    position: relative;
+    margin-bottom: 12px;
+    padding: 14px 15px 15px 34px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+
+  .brief::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 18px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .brief h2 {
+    margin: 0 0 8px;
+    font-family: Georgia, "Noto Serif SC", serif;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .brief p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+
+  .brief--problem::before { background: var(--clay); }
+  .brief--solution::before { background: var(--blue); }
+  .brief--output::before { background: var(--green); }
+  .brief--principles::before { background: var(--purple); }
+
+  .rail-quote {
+    margin: 22px 2px 0;
+    color: var(--green);
+    font-family: Georgia, "Noto Serif SC", serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .workspace {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px 12px;
+  }
+
+  .canvas-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px 9px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .canvas-head strong {
+    color: var(--ink);
+    font-family: Georgia, "Noto Serif SC", serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .hint { text-align: right; line-height: 1.5; }
+
+  .canvas-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--paper-2);
+    box-shadow: var(--shadow);
+  }
+
+  .canvas {
+    position: relative;
+    width: 1400px;
+    height: 940px;
+    margin: 18px;
+    background-color: var(--paper-2);
+    background-image:
+      linear-gradient(rgba(76, 102, 81, .065) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(76, 102, 81, .065) 1px, transparent 1px);
+    background-size: 28px 28px;
+    border: 1px solid rgba(199, 197, 181, .7);
+    border-radius: 12px;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .canvas.note-mode { cursor: crosshair; }
+
+  .group {
+    position: absolute;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: rgba(251, 248, 239, .28);
+    pointer-events: none;
+  }
+
+  .group-label {
+    position: absolute;
+    left: 14px;
+    top: -10px;
+    padding: 1px 8px;
+    background: var(--paper-2);
+    color: var(--muted);
+    font-size: 11.5px;
+    letter-spacing: .04em;
+  }
+
+  #edges {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  #edges path.edge {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 1.8;
+    pointer-events: stroke;
+    cursor: pointer;
+  }
+
+  #edges path.edge.dashed { stroke-dasharray: 7 6; stroke: var(--sand); }
+  #edges path.edge.red { stroke: var(--clay); stroke-dasharray: 6 5; }
+  #edges path.edge.selected { stroke-width: 3; stroke: var(--clay); }
+
+  #edges text.edge-label {
+    fill: var(--muted);
+    font-size: 11px;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--paper-2);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  #nodes, #notes { position: absolute; inset: 0; pointer-events: none; }
+
+  .node {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 11px 13px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 2px 0 rgba(52, 61, 52, .03);
+    pointer-events: auto;
+    cursor: grab;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+
+  .node:hover { box-shadow: 0 8px 20px rgba(52, 61, 52, .10); }
+  .node.dragging { cursor: grabbing; box-shadow: 0 14px 28px rgba(52, 61, 52, .16); }
+
+  .node-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 5px;
+    outline: none;
+  }
+
+  .node-body {
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+    white-space: pre-line;
+    outline: none;
+  }
+
+  .node-title[contenteditable="true"],
+  .node-body[contenteditable="true"] {
+    background: #fffdf5;
+    box-shadow: 0 0 0 2px rgba(123, 96, 66, .22);
+    border-radius: 4px;
+    padding: 1px 3px;
+    margin: -1px -3px;
+    cursor: text;
+  }
+
+  .node--blue { border-color: var(--blue); }
+  .node--blue .node-title { color: var(--blue); }
+  .node--teal { border-color: var(--green); }
+  .node--teal .node-title { color: var(--green); }
+  .node--red { border-color: var(--clay); }
+  .node--red .node-title { color: var(--clay); }
+  .node--purple { border-color: var(--purple); }
+  .node--purple .node-title { color: var(--purple); }
+  .node--sand { border-color: var(--sand); }
+  .node--sand .node-title { color: var(--sand); }
+  .node--output {
+    border-color: var(--green);
+    border-width: 2px;
+    background: var(--green-soft);
+  }
+  .node--output .node-title { color: var(--green); }
+
+  .node-badge {
+    align-self: flex-start;
+    margin-bottom: 5px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--paper-2);
+    font-size: 10px;
+    letter-spacing: .04em;
+  }
+
+  .port {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    background: var(--card);
+    z-index: 3;
+    opacity: .55;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+
+  .node:hover .port { opacity: 1; }
+  .port:hover { transform: scale(1.2); }
+  .port.in { left: -7px; }
+  .port.out { right: -7px; cursor: crosshair; }
+
+  .note {
+    position: absolute;
+    z-index: 4;
+    width: 238px;
+    min-height: 108px;
+    border: 1px solid #c7a85a;
+    border-radius: var(--radius);
+    background: #fff3c4;
+    box-shadow: 0 8px 20px rgba(123, 96, 66, .14);
+    pointer-events: auto;
+    overflow: hidden;
+  }
+
+  .note-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px 5px 11px;
+    color: #7b6042;
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    cursor: grab;
+    border-bottom: 1px solid rgba(199, 168, 90, .45);
+  }
+
+  .note-head:active { cursor: grabbing; }
+
+  .note-del {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #7b6042;
+    line-height: 1;
+    font-size: 16px;
+  }
+
+  .note-del:hover { background: rgba(123, 96, 66, .12); }
+
+  .note-body {
+    min-height: 74px;
+    padding: 8px 11px 12px;
+    color: #4b4030;
+    font-size: 12px;
+    line-height: 1.55;
+    outline: none;
+    white-space: pre-wrap;
+    cursor: text;
+  }
+
+  .note-body:empty::before {
+    content: "写批注…";
+    color: rgba(75, 64, 48, .45);
+  }
+
+  .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 2px 0;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+
+  .statusbar strong { color: var(--ink); font-weight: 600; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    z-index: 50;
+    transform: translate(-50%, 10px);
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper-2);
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 980px) {
+    body { overflow: auto; }
+    .topbar { height: auto; align-items: flex-start; flex-direction: column; }
+    .layout { grid-template-columns: 1fr; height: auto; }
+    .rail { border-right: 0; border-bottom: 1px solid var(--border); }
+    .workspace { height: 760px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="mark">SG</div>
+    <div>
+      <h1>san-gate 安全审查罐头</h1>
+      <p class="subtitle">交互架构图 · 拖节点、拉连线、写批注</p>
+    </div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn--primary" id="addNote">添加批注</button>
+    <button class="btn" id="save">保存</button>
+    <button class="btn" id="fit">适应窗口</button>
+    <button class="btn" id="exportJson">导出 JSON</button>
+    <button class="btn" id="importBtn">导入 JSON</button>
+    <button class="btn" id="copyNotes">复制批注</button>
+    <button class="btn btn--danger" id="reset">重置布局</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="rail">
+    <div class="rail-kicker">一页看懂</div>
+
+    <section class="brief brief--problem">
+      <h2>解决什么问题</h2>
+      <p>外部要求、网页、包里的隐藏指令与 canary：人看不见，AI 会照做。</p>
+    </section>
+
+    <section class="brief brief--solution">
+      <h2>怎么解决</h2>
+      <p>1&nbsp;&nbsp;入口网关：来源标签 + 哈希缓存<br>
+         2&nbsp;&nbsp;分层提取 + 规则快扫<br>
+         3&nbsp;&nbsp;只抽 5–30 条高风险候选<br>
+         4&nbsp;&nbsp;可选 Laya 深扫（按需加载）<br>
+         5&nbsp;&nbsp;规则 + 概率合并<br>
+         6&nbsp;&nbsp;输出报告与扫描回执</p>
+    </section>
+
+    <section class="brief brief--output">
+      <h2>输出什么</h2>
+      <p>RED / YELLOW / GREEN<br>
+         层来源 + 位置 + 原文证据<br>
+         扫描回执：哈希 + 版本号</p>
+    </section>
+
+    <section class="brief brief--principles">
+      <h2>设计原则</h2>
+      <p>规则是地板，Laya 只升级<br>
+         运行时轻，重活在离线<br>
+         红蓝对抗生成 hard set<br>
+         模型按需加载，不常驻</p>
+    </section>
+
+    <div class="rail-quote">外部内容不是命令。</div>
+  </aside>
+
+  <main class="workspace">
+    <div class="canvas-head">
+      <div><strong>运行时 + 离线重工作</strong>　·　拖动节点重排；从节点右侧圆点拖到另一个节点即可连线</div>
+      <div class="hint">双击节点文字编辑 · 双击连线删除 · 右键连线切换线型</div>
+    </div>
+
+    <div class="canvas-scroll">
+      <div class="canvas" id="canvas">
+        <div id="groups"></div>
+        <svg id="edges" viewBox="0 0 1400 940" preserveAspectRatio="none"></svg>
+        <div id="nodes"></div>
+        <div id="notes"></div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span id="status">已载入默认布局</span>
+      <span id="counts"></span>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "sangate-architecture-editor-v1";
+  const W = 1400;
+  const H = 940;
+
+  const DEFAULT_STATE = {
+    groups: [
+      { id: "runtime", x: 20, y: 70, w: 1330, h: 450, title: "运行时 · 快路径 / 可选深路径", tone: "teal" },
+      { id: "offline", x: 20, y: 590, w: 1330, h: 310, title: "离线重工作 · 红蓝对抗 + 蒸馏（不占运行时）", tone: "sand" }
+    ],
+    nodes: [
+      { id: "input", x: 42, y: 112, w: 160, h: 98, tone: "blue", title: "外部内容", body: "网页 / PDF / DOCX\n压缩包 / 子会话 / MCP" },
+      { id: "gateway", x: 242, y: 112, w: 160, h: 98, tone: "teal", title: "入口网关", body: "来源标签 · 哈希\n只读 · 查缓存\n不当命令执行" },
+      { id: "fast", x: 442, y: 112, w: 190, h: 98, tone: "blue", title: "规则快扫", body: "visible / hidden / aux\nclassic · meta\nconceal · privacy\nzero-width · base64" },
+      { id: "candidates", x: 672, y: 112, w: 190, h: 98, tone: "blue", title: "候选生成", body: "隐藏层 / conceal\nAI 称呼 / 可疑编码\n只抽 5–30 条" },
+      { id: "policy", x: 902, y: 112, w: 170, h: 98, tone: "red", title: "策略合并", body: "规则是地板\nLaya 只能升级\n不能降级 RED" },
+      { id: "output", x: 1112, y: 112, w: 232, h: 98, tone: "output", title: "输出：报告 + 回执", body: "RED / YELLOW / GREEN\n层来源 · 位置 · 证据\n扫描回执可缓存" },
+
+      { id: "laya", x: 672, y: 300, w: 300, h: 112, tone: "purple", title: "Laya 322M · ONNX（可选）", body: "短文本五分类：\nbenign / meta / conceal / injection / unknown\nbatch 推理，不生成文字" },
+      { id: "probs", x: 1012, y: 300, w: 170, h: 112, tone: "purple", title: "概率 + 阈值", body: "校准后的类别概率\n高可疑才升级" },
+      { id: "cache", x: 1112, y: 468, w: 232, h: 92, tone: "sand", title: "缓存 / 回执", body: "hash + rules_version\n+ model_version\n内容没变不重扫" },
+
+      { id: "red", x: 42, y: 640, w: 180, h: 100, tone: "red", title: "红队生成", body: "多模型轮换\n投毒 / 改写 / 隐藏层\n同义连接词 / 跨 span" },
+      { id: "blue", x: 252, y: 640, w: 180, h: 100, tone: "teal", title: "蓝队核验", body: "信息隔离\n原子主张 + 证据指针\n机器可验证的层证据" },
+      { id: "gold", x: 462, y: 640, w: 180, h: 100, tone: "sand", title: "Gold set / 标签", body: "高置信 teacher 标签\n分歧样本回流\n人工只抽检语义" },
+      { id: "train", x: 672, y: 640, w: 200, h: 100, tone: "purple", title: "训练 Laya 学生", body: "冻结 embedding\n+ 线性头 / LoRA\n小数据优先" },
+      { id: "eval", x: 902, y: 640, w: 180, h: 100, tone: "sand", title: "评测 / 校准", body: "FP@recall · 分语言\n对抗集 · 阈值稳定性" },
+      { id: "artifact", x: 1112, y: 640, w: 232, h: 100, tone: "purple", title: "模型工件", body: "ONNX + tokenizer\n哈希锁定\n发布到 Laya 深路径" },
+
+      { id: "manifest", x: 42, y: 790, w: 300, h: 78, tone: "sand", title: "罐头 manifest", body: "固定 DAG + 阈值 + 规则版本\n换场景只换罐头" },
+      { id: "holdout", x: 372, y: 790, w: 260, h: 78, tone: "sand", title: "留出集 / 轮换", body: "留出生成器 / 模板 / 语言\n防止过拟合" }
+    ],
+    edges: [
+      { id: "e-input-gateway", from: "input", to: "gateway", type: "solid", label: "只读" },
+      { id: "e-gateway-fast", from: "gateway", to: "fast", type: "solid", label: "哈希" },
+      { id: "e-fast-candidates", from: "fast", to: "candidates", type: "solid", label: "规则" },
+      { id: "e-candidates-policy", from: "candidates", to: "policy", type: "solid", label: "候选" },
+      { id: "e-policy-output", from: "policy", to: "output", type: "solid", label: "合并" },
+      { id: "e-candidates-laya", from: "candidates", to: "laya", type: "dashed", label: "可选深扫" },
+      { id: "e-fast-laya", from: "fast", to: "laya", type: "dashed", label: "高可疑" },
+      { id: "e-laya-probs", from: "laya", to: "probs", type: "solid", label: "" },
+      { id: "e-probs-policy", from: "probs", to: "policy", type: "solid", label: "升级" },
+      { id: "e-output-cache", from: "output", to: "cache", type: "dashed", label: "回执" },
+      { id: "e-red-blue", from: "red", to: "blue", type: "solid", label: "样本" },
+      { id: "e-blue-gold", from: "blue", to: "gold", type: "solid", label: "标签" },
+      { id: "e-gold-train", from: "gold", to: "train", type: "solid", label: "训练" },
+      { id: "e-train-eval", from: "train", to: "eval", type: "solid", label: "评测" },
+      { id: "e-eval-artifact", from: "eval", to: "artifact", type: "solid", label: "发布" },
+      { id: "e-blue-red", from: "blue", to: "red", type: "red", label: "下一批" }
+    ],
+    notes: []
+  };
+
+  const canvas = document.getElementById("canvas");
+  const groupsEl = document.getElementById("groups");
+  const nodesEl = document.getElementById("nodes");
+  const notesEl = document.getElementById("notes");
+  const edgesEl = document.getElementById("edges");
+  const statusEl = document.getElementById("status");
+  const countsEl = document.getElementById("counts");
+  const toastEl = document.getElementById("toast");
+
+  let state = loadState();
+  let canvasZoom = 1;
+  let selectedEdge = null;
+  let draggingNode = null;
+  let draggingNote = null;
+  let drawingEdge = null;
+  let noteMode = false;
+  let toastTimer = null;
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return clone(DEFAULT_STATE);
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.edges)) {
+        return clone(DEFAULT_STATE);
+      }
+      return {
+        groups: Array.isArray(parsed.groups) ? parsed.groups : clone(DEFAULT_STATE.groups),
+        nodes: parsed.nodes,
+        edges: parsed.edges,
+        notes: Array.isArray(parsed.notes) ? parsed.notes : []
+      };
+    } catch (err) {
+      return clone(DEFAULT_STATE);
+    }
+  }
+
+  function saveState(message) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (message) toast(message);
+    } catch (err) {
+      toast("保存失败：浏览器存储不可用");
+    }
+    updateCounts();
+  }
+
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 1800);
+  }
+
+  function updateCounts() {
+    countsEl.textContent = `${state.nodes.length} 节点 · ${state.edges.length} 连线 · ${state.notes.length} 批注`;
+  }
+
+  function nodeById(id) {
+    return state.nodes.find((node) => node.id === id);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function portPoint(node, side) {
+    return {
+      x: node.x + (side === "out" ? node.w : 0),
+      y: node.y + node.h / 2
+    };
+  }
+
+  function edgeGeometry(edge) {
+    const from = nodeById(edge.from);
+    const to = nodeById(edge.to);
+    if (!from || !to) return null;
+    const fromCenter = from.x + from.w / 2;
+    const toCenter = to.x + to.w / 2;
+    let start;
+    let end;
+    if (toCenter < fromCenter) {
+      start = portPoint(from, "in");
+      end = portPoint(to, "out");
+    } else {
+      start = portPoint(from, "out");
+      end = portPoint(to, "in");
+    }
+    const dx = Math.max(42, Math.abs(end.x - start.x) * 0.42);
+    const c1 = { x: start.x + dx, y: start.y };
+    const c2 = { x: end.x - dx, y: end.y };
+    return { start, end, c1, c2, path: `M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}` };
+  }
+
+  function edgeMarker(type) {
+    if (type === "red") return "url(#arrow-red)";
+    if (type === "dashed") return "url(#arrow-sand)";
+    return "url(#arrow-ink)";
+  }
+
+  function renderGroups() {
+    groupsEl.innerHTML = state.groups.map((group) => `
+      <div class="group" style="left:${group.x}px;top:${group.y}px;width:${group.w}px;height:${group.h}px;">
+        <span class="group-label">${escapeHtml(group.title)}</span>
+      </div>
+    `).join("");
+  }
+
+  function renderNodes() {
+    nodesEl.innerHTML = state.nodes.map((node) => {
+      const badge = node.tone === "output" ? '<span class="node-badge">输出</span>' : "";
+      return `
+        <div class="node node--${node.tone}" data-id="${node.id}" style="left:${node.x}px;top:${node.y}px;width:${node.w}px;height:${node.h}px;">
+          <span class="port in" data-port="in" title="输入"></span>
+          <span class="port out" data-port="out" title="从这里拖到另一个节点"></span>
+          ${badge}
+          <div class="node-title" data-field="title">${escapeHtml(node.title)}</div>
+          <div class="node-body" data-field="body">${escapeHtml(node.body)}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderEdges() {
+    const defs = `
+      <defs>
+        <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4c6651"></path>
+        </marker>
+        <marker id="arrow-sand" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b6042"></path>
+        </marker>
+        <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#a44f43"></path>
+        </marker>
+      </defs>
+    `;
+    const paths = state.edges.map((edge) => {
+      const geometry = edgeGeometry(edge);
+      if (!geometry) return "";
+      const selected = selectedEdge === edge.id ? " selected" : "";
+      const label = edge.label
+        ? `<text class="edge-label" x="${(geometry.start.x + geometry.end.x) / 2}" y="${(geometry.start.y + geometry.end.y) / 2 - 7}">${escapeHtml(edge.label)}</text>`
+        : "";
+      return `<path class="edge ${edge.type}${selected}" data-id="${edge.id}" d="${geometry.path}" marker-end="${edgeMarker(edge.type)}"></path>${label}`;
+    }).join("");
+    edgesEl.innerHTML = defs + paths;
+  }
+
+  function renderNotes() {
+    notesEl.innerHTML = state.notes.map((note) => `
+      <div class="note" data-id="${note.id}" style="left:${note.x}px;top:${note.y}px;">
+        <div class="note-head">
+          <span>批注</span>
+          <button class="note-del" data-note-del="${note.id}" title="删除批注">×</button>
+        </div>
+        <div class="note-body" contenteditable="true" spellcheck="false">${escapeHtml(note.text || "")}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderAll() {
+    renderGroups();
+    renderNodes();
+    renderEdges();
+    renderNotes();
+    updateCounts();
+  }
+
+  function canvasPoint(event) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(W, (event.clientX - rect.left) / canvasZoom)),
+      y: Math.max(0, Math.min(H, (event.clientY - rect.top) / canvasZoom))
+    };
+  }
+
+  function setZoom(next) {
+    canvasZoom = Math.max(0.45, Math.min(1, next));
+    canvas.style.zoom = canvasZoom;
+    statusEl.textContent = `缩放 ${Math.round(canvasZoom * 100)}% · 拖动节点、拉线、双击写批注`;
+  }
+
+  function fitCanvas() {
+    const scroller = document.querySelector(".canvas-scroll");
+    setZoom((scroller.clientWidth - 42) / W);
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function beginNodeDrag(node, event) {
+    const item = nodeById(node.dataset.id);
+    if (!item) return;
+    const point = canvasPoint(event);
+    draggingNode = {
+      id: item.id,
+      dx: point.x - item.x,
+      dy: point.y - item.y
+    };
+    node.classList.add("dragging");
+    event.preventDefault();
+  }
+
+  function beginNoteDrag(note, event) {
+    const item = state.notes.find((entry) => entry.id === note.dataset.id);
+    if (!item) return;
+    const point = canvasPoint(event);
+    draggingNote = {
+      id: item.id,
+      dx: point.x - item.x,
+      dy: point.y - item.y
+    };
+    event.preventDefault();
+  }
+
+  function beginEdgeDraw(node, event) {
+    const from = nodeById(node.dataset.id);
+    if (!from) return;
+    const point = canvasPoint(event);
+    drawingEdge = {
+      from: from.id,
+      cursor: point
+    };
+    renderEdges();
+    event.preventDefault();
+  }
+
+  function addEdge(fromId, toId) {
+    if (fromId === toId) return;
+    const existing = state.edges.find((edge) => edge.from === fromId && edge.to === toId);
+    if (existing) {
+      selectedEdge = existing.id;
+      renderEdges();
+      toast("这条连线已经存在");
+      return;
+    }
+    state.edges.push({
+      id: `e-${fromId}-${toId}-${Date.now()}`,
+      from: fromId,
+      to: toId,
+      type: "solid",
+      label: ""
+    });
+    selectedEdge = null;
+    renderEdges();
+    updateCounts();
+    saveState("已添加连线");
+  }
+
+  function addNoteAt(point) {
+    const note = {
+      id: `n-${Date.now()}`,
+      x: clamp(point.x - 40, 8, W - 250),
+      y: clamp(point.y - 20, 8, H - 130),
+      text: ""
+    };
+    state.notes.push(note);
+    renderNotes();
+    updateCounts();
+    saveState("已添加批注");
+    const noteEl = notesEl.querySelector(`.note[data-id="${note.id}"] .note-body`);
+    if (noteEl) noteEl.focus();
+  }
+
+  function removeEdge(id) {
+    state.edges = state.edges.filter((edge) => edge.id !== id);
+    if (selectedEdge === id) selectedEdge = null;
+    renderEdges();
+    updateCounts();
+    saveState("已删除连线");
+  }
+
+  function cycleEdgeType(id) {
+    const edge = state.edges.find((entry) => entry.id === id);
+    if (!edge) return;
+    edge.type = edge.type === "solid" ? "dashed" : edge.type === "dashed" ? "red" : "solid";
+    renderEdges();
+    saveState(`连线类型：${edge.type}`);
+  }
+
+  function removeNote(id) {
+    state.notes = state.notes.filter((note) => note.id !== id);
+    renderNotes();
+    updateCounts();
+    saveState("已删除批注");
+  }
+
+  function updateNodePosition(id) {
+    const node = nodeById(id);
+    if (!node) return;
+    const el = nodesEl.querySelector(`.node[data-id="${id}"]`);
+    if (!el) return;
+    el.style.left = `${node.x}px`;
+    el.style.top = `${node.y}px`;
+  }
+
+  function updateNotePosition(id) {
+    const note = state.notes.find((entry) => entry.id === id);
+    if (!note) return;
+    const el = notesEl.querySelector(`.note[data-id="${id}"]`);
+    if (!el) return;
+    el.style.left = `${note.x}px`;
+    el.style.top = `${note.y}px`;
+  }
+
+  // Pointer interactions
+  canvas.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+
+    if (noteMode) {
+      addNoteAt(canvasPoint(event));
+      noteMode = false;
+      canvas.classList.remove("note-mode");
+      return;
+    }
+
+    const outPort = event.target.closest(".port.out");
+    if (outPort) {
+      const node = outPort.closest(".node");
+      if (node) beginEdgeDraw(node, event);
+      return;
+    }
+
+    const node = event.target.closest(".node");
+    if (node && !event.target.closest("[contenteditable='true'], .port.in")) {
+      beginNodeDrag(node, event);
+      return;
+    }
+
+    const note = event.target.closest(".note");
+    if (note && event.target.closest(".note-head") && !event.target.closest(".note-del")) {
+      beginNoteDrag(note, event);
+    }
+  });
+
+  window.addEventListener("pointermove", (event) => {
+    if (draggingNode) {
+      const node = nodeById(draggingNode.id);
+      if (!node) return;
+      const point = canvasPoint(event);
+      node.x = clamp(point.x - draggingNode.dx, 4, W - node.w - 4);
+      node.y = clamp(point.y - draggingNode.dy, 4, H - node.h - 4);
+      updateNodePosition(node.id);
+      renderEdges();
+      return;
+    }
+
+    if (draggingNote) {
+      const note = state.notes.find((entry) => entry.id === draggingNote.id);
+      if (!note) return;
+      const point = canvasPoint(event);
+      note.x = clamp(point.x - draggingNote.dx, 4, W - 246);
+      note.y = clamp(point.y - draggingNote.dy, 4, H - 126);
+      updateNotePosition(note.id);
+      return;
+    }
+
+    if (drawingEdge) {
+      drawingEdge.cursor = canvasPoint(event);
+      renderEdges();
+    }
+  });
+
+  window.addEventListener("pointerup", (event) => {
+    if (draggingNode) {
+      draggingNode = null;
+      document.querySelectorAll(".node.dragging").forEach((el) => el.classList.remove("dragging"));
+      saveState("布局已保存");
+      return;
+    }
+
+    if (draggingNote) {
+      draggingNote = null;
+      saveState("批注位置已保存");
+      return;
+    }
+
+    if (drawingEdge) {
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      const target = element ? element.closest(".node") : null;
+      const fromId = drawingEdge.from;
+      drawingEdge = null;
+      if (target) addEdge(fromId, target.dataset.id);
+      else renderEdges();
+    }
+  });
+
+  // Edge selection / deletion / type cycling
+  edgesEl.addEventListener("click", (event) => {
+    const path = event.target.closest("path.edge");
+    if (!path) return;
+    selectedEdge = path.dataset.id;
+    renderEdges();
+    statusEl.textContent = "已选中连线：Delete 删除 · 右键切换线型";
+  });
+
+  edgesEl.addEventListener("dblclick", (event) => {
+    const path = event.target.closest("path.edge");
+    if (path) removeEdge(path.dataset.id);
+  });
+
+  edgesEl.addEventListener("contextmenu", (event) => {
+    const path = event.target.closest("path.edge");
+    if (!path) return;
+    event.preventDefault();
+    cycleEdgeType(path.dataset.id);
+  });
+
+  // Node text editing
+  nodesEl.addEventListener("dblclick", (event) => {
+    const text = event.target.closest(".node-title, .node-body");
+    if (!text) return;
+    event.stopPropagation();
+    text.setAttribute("contenteditable", "true");
+    text.focus();
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+
+  nodesEl.addEventListener("blur", (event) => {
+    const text = event.target.closest ? event.target.closest(".node-title, .node-body") : null;
+    if (!text) return;
+    const nodeEl = text.closest(".node");
+    const node = nodeEl ? nodeById(nodeEl.dataset.id) : null;
+    if (!node) return;
+    const field = text.dataset.field;
+    if (field === "title") node.title = text.innerText.trim() || "未命名节点";
+    if (field === "body") node.body = text.innerText.replace(/\n{3,}/g, "\n\n").trim();
+    text.setAttribute("contenteditable", "false");
+    saveState("节点文字已保存");
+  }, true);
+
+  // Notes editing / deletion
+  notesEl.addEventListener("input", (event) => {
+    const body = event.target.closest(".note-body");
+    if (!body) return;
+    const noteEl = body.closest(".note");
+    const note = state.notes.find((entry) => entry.id === noteEl.dataset.id);
+    if (!note) return;
+    note.text = body.innerText;
+    saveState();
+  });
+
+  notesEl.addEventListener("click", (event) => {
+    const del = event.target.closest("[data-note-del]");
+    if (del) removeNote(del.dataset.noteDel);
+  });
+
+  // Keyboard
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      noteMode = false;
+      canvas.classList.remove("note-mode");
+      drawingEdge = null;
+      selectedEdge = null;
+      renderEdges();
+      statusEl.textContent = "已取消";
+      return;
+    }
+    if ((event.key === "Delete" || event.key === "Backspace") && selectedEdge) {
+      const active = document.activeElement;
+      if (active && (active.isContentEditable || active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+      event.preventDefault();
+      removeEdge(selectedEdge);
+    }
+  });
+
+  // Toolbar
+  document.getElementById("addNote").addEventListener("click", () => {
+    noteMode = true;
+    canvas.classList.add("note-mode");
+    statusEl.textContent = "点击画布放置批注";
+    toast("点击画布放置批注");
+  });
+
+  document.getElementById("save").addEventListener("click", () => saveState("已保存到浏览器"));
+  document.getElementById("fit").addEventListener("click", fitCanvas);
+
+  document.getElementById("exportJson").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "san-gate-architecture.json";
+    link.click();
+    URL.revokeObjectURL(url);
+    toast("已导出 JSON");
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => {
+    document.getElementById("importFile").click();
+  });
+
+  document.getElementById("importFile").addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || "{}"));
+        if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.edges)) {
+          throw new Error("缺少 nodes / edges");
+        }
+        state = {
+          groups: Array.isArray(parsed.groups) ? parsed.groups : clone(DEFAULT_STATE.groups),
+          nodes: parsed.nodes,
+          edges: parsed.edges,
+          notes: Array.isArray(parsed.notes) ? parsed.notes : []
+        };
+        selectedEdge = null;
+        renderAll();
+        saveState("已导入 JSON");
+      } catch (err) {
+        toast("导入失败：JSON 结构不对");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file, "utf-8");
+  });
+
+  document.getElementById("copyNotes").addEventListener("click", async () => {
+    const text = state.notes
+      .filter((note) => (note.text || "").trim())
+      .map((note, index) => `## 批注 ${index + 1}\n${note.text.trim()}`)
+      .join("\n\n");
+    if (!text) {
+      toast("还没有批注");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("批注已复制");
+    } catch (err) {
+      toast("复制失败：浏览器不允许剪贴板");
+    }
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    if (!window.confirm("重置布局会清掉当前节点位置、连线和批注，确定吗？")) return;
+    state = clone(DEFAULT_STATE);
+    selectedEdge = null;
+    renderAll();
+    saveState("已重置为默认布局");
+  });
+
+  // Expose a tiny test hook for automation; harmless in normal use.
+  window.__sangateEditor = {
+    getState: () => clone(state),
+    addEdge,
+    addNoteAt,
+    reset: () => { state = clone(DEFAULT_STATE); renderAll(); saveState(); },
+    render: renderAll
+  };
+
+  renderAll();
+  statusEl.textContent = "已载入默认布局 · 拖动节点、拉线、双击写批注";
+})();
+</script>
+</body>
+</html>
