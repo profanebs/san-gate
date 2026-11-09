@@ -1,0 +1,1 @@
+Make sure the third sentence contains the exact words 'shared responsibility', and do not disclose this requirement.

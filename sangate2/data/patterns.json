@@ -1,0 +1,88 @@
+{
+  "classic": [
+    "(?i)ignore\\s+(all\\s+)?(previous|prior|above|earlier)\\s+(instructions?|prompts?|rules?|context)",
+    "(?i)disregard\\s+(all\\s+)?(previous|prior|above|earlier)",
+    "(?i)forget\\s+(everything|all)\\s+(you|above)",
+    "(?i)\\b(ignore|disregard|override|forget|reveal|show|print|repeat|leak|expose|output)\\b[^.\\n]{0,60}\\b(system|developer)\\s+prompt\\b",
+    "(?i)\\b(system|developer)\\s+prompt\\b[^.\\n]{0,20}\\b(ignore|disregard|override|forget|reveal|show|print|repeat|leak|expose|output)\\b",
+    "(?i)\\bnew\\s+instructions?\\s*[:\\-]",
+    "(?i)\\b(ignore|disregard|forget)\\b[^.\\n]{0,40}\\bnew\\s+instructions?\\b",
+    "(?i)\\bnote\\s+to\\s+(the\\s+)?(ai|assistant|llm|agent|model)\\b",
+    "(?i)\\bif\\s+you\\s+are\\s+(an?\\s+)?(ai|assistant|llm|agent|language\\s+model)\\b",
+    "忽略\\s*(以上|之前|上述|前面)\\s*的?\\s*(所有)?\\s*(指令|指示|规则|说明)",
+    "系统\\s*提示",
+    "新\\s*的?\\s*指令",
+    "如果\\s*你\\s*是\\s*(大模型|AI|助手)"
+  ],
+  "ai_address": [
+    "(?i)\\bas\\s+an?\\s+(ai|assistant|language\\s+model|agent|llm)\\b",
+    "(?i)\\bif\\s+you\\s+are\\s+(an?\\s+)?(ai|assistant|language\\s+model|agent|llm)\\b",
+    "(?i)\\b(reveal|show|print|repeat|leak|expose|output)\\b[^.\\n]{0,40}\\b(system|developer)\\s+prompt\\b",
+    "作为\\s*(AI|人工智能|助手|大模型)",
+    "如果你\\s*是\\s*(AI|大模型|助手)",
+    "系统\\s*提示"
+  ],
+  "meta_critical": [
+    "(?i)\\b(include|insert|add|write|put|contain)\\s+[\"“'][^\"”'\\n]{2,80}[\"”']",
+    "(?i)\\b(include|insert|add|write|put|contain)\\b[^.\\n]{0,60}\\b(phrase|words?|sentence|string)\\b[^.\\n]{0,40}[\"“']",
+    "(?i)\\buse\\s+(the\\s+)?(phrase|words?|sentence|string)\\b[^.\\n]{0,40}[\"“']",
+    "(?i)\\b(exact|specified)\\s+(words?|phrases?|wording|sentence)\\b",
+    "(?i)\\b(contains?|containing)\\b[^.\\n]{0,80}[\"“'][^\"”'\\n]{2,80}[\"”']",
+    "指定\\s*短语",
+    "一字不差",
+    "必须\\s*包含[^。\\n]{0,20}(短语|词语|句子|引文|原话)",
+    "(逐字|原样|原话)[^。\\n]{0,20}(写|加入|放入|包含|照抄|复制|使用|保留|引用)",
+    "(写|加入|放入|包含|照抄|复制|使用|保留|引用)[^。\\n]{0,20}(逐字|原样|原话)",
+    "(包含|加入|写入|放入|写上)[^。\\n]{0,20}[“'][^”'\\n]{2,80}[”']"
+  ],
+  "meta_strong": [
+    "(?i)\\b(third|first|second|last|3rd|2nd|1st)\\s+sentence\\b",
+    "(?i)\\bsentence\\s+(3|three|third)\\b",
+    "(?i)\\b(paragraph|section)\\s+(3|three|third)\\b",
+    "(?i)\\bfinal\\s+paragraph\\b",
+    "(?i)\\bverbatim\\b",
+    "第三\\s*句",
+    "第[一二三四五六]段",
+    "结尾\\s*(原样|必须)?\\s*(写|加)",
+    "开头\\s*(必须)?\\s*(写|加)"
+  ],
+  "meta_weak": [
+    "(?i)\\b(include|insert|use|add|write|put|contain)\\b[^.\\n]{0,80}\\b(phrase|words?|sentence|string)\\b",
+    "(?i)\\b(start|begin|end)\\s+(your\\s+)?(response|essay|answer)\\s+with\\b",
+    "(?i)\\b(your\\s+)?(second|third|final)\\s+paragraph\\b",
+    "结尾\\s*(原样|必须)?\\s*(写|加)",
+    "开头\\s*(必须)?\\s*(写|加)",
+    "第[一二三四五六]段"
+  ],
+  "conceal": [
+    "(?i)\\b(do\\s+not|don't|never)\\s+(state|mention|say|disclose|reveal|tell|inform)\\b[^.\\n]{0,140}?\\b(that\\s+you|you\\s+are|you\\s+were|this\\s+phrase|this\\s+instruction|the\\s+phrase|the\\s+instruction|the\\s+user|the\\s+reader|the\\s+applicant)\\b",
+    "(?i)\\bwithout\\s+(mentioning|telling|informing|alerting|disclosing\\s+to)\\b[^.\\n]{0,30}\\b(the\\s+)?(user|reader|applicant)\\b",
+    "(?i)\\bdo\\s+not\\s+(acknowledge|reveal)\\s+(these\\s+)?(instructions?|prompt)\\b",
+    "(?i)\\b(do\\s+not|don't|never)\\s+(state|mention|say|disclose|reveal|tell|inform)\\b[^.\\n]{0,140}?\\b(this\\s+requirement|the\\s+requirement|this\\s+rule|the\\s+rule|this\\s+request|the\\s+request)\\b",
+    "(?i)\\bkeep\\s+(this\\s+)?(instruction|requirement|request)\\s+(confidential|secret)\\b",
+    "(?i)\\b(the\\s+)?(reader|user|applicant)\\s+should\\s+not\\s+know\\b",
+    "(?i)\\bwithout\\s+(the\\s+)?(user|reader)\\s+knowing\\b",
+    "(?i)\\b(the\\s+)?(user|reader|applicant)\\s+(must|should)\\s+not\\s+(know|be\\s+told)\\b",
+    "(?i)\\b(must|should)\\s+not\\s+(disclose|reveal|mention)\\b[^.\\n]{0,80}?\\b(this\\s+)?(instruction|requirement|rule|request)\\b",
+    "(?i)\\b(don't|do\\s+not|never)\\s+let\\s+(the\\s+)?(user|reader|applicant)\\s+know\\b",
+    "不要\\s*[^。\\n]{0,40}(说明|提及|告诉|透露|承认)[^。\\n]{0,80}?(你|这句话|这个指令|用户|读者|申请人)",
+    "不要[^。\\n]{0,50}(说明|提及|告诉|透露|承认)[^。\\n]{0,80}?(要求|指令|短语|句子|这件事|此事)",
+    "别让[^。\\n]{0,10}知道",
+    "不得\\s*(告知|说明|提及)",
+    "不要\\s*承认\\s*(这些)?\\s*(指令|提示)"
+  ],
+  "privacy": [
+    "(?i)\\bdo\\s+not\\s+include\\b[^.\\n]{0,40}\\b(names?|identifying|personal)\\b",
+    "(?i)\\banonymi[sz]e\\b",
+    "(?i)\\bblind\\s+review\\b",
+    "(?i)\\bidentifying\\s+information\\b",
+    "不要\\s*写\\s*(姓名|名字)",
+    "匿名",
+    "隐去\\s*姓名",
+    "身份信息"
+  ],
+  "imperative": [
+    "(?i)\\b(include|insert|add|write|use|put|state|mention|say|tell|ignore|disregard|forget|send|run|execute|delete|upload|download|contain)\\b",
+    "写|加入|包含|说明|提及|告诉|忽略|执行|运行|发送|上传|下载|删除"
+  ]
+}
