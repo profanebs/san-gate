@@ -692,7 +692,7 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">
+  <div class="brand" data-anno-scope="brand">
     <div class="mark">SG</div>
     <div>
       <h1>san-gate 安全审查罐头</h1>
@@ -712,7 +712,7 @@
 </header>
 
 <div class="layout">
-  <aside class="rail">
+  <aside class="rail" data-anno-scope="rail">
     <div class="rail-kicker">一页看懂</div>
 
     <section class="brief brief--problem">
@@ -749,9 +749,9 @@
   </aside>
 
   <main class="workspace">
-    <div class="canvas-head">
+    <div class="canvas-head" data-anno-scope="canvas-head">
       <div><strong>运行时 + 离线重工作</strong>　·　拖动节点重排；从节点右侧圆点拖到另一个节点即可连线</div>
-      <div class="hint">双击节点文字编辑 · 选中文字可批注 · 双击连线删除 · 右键切换线型</div>
+      <div class="hint">选中侧栏 / 标题 / 节点文字即可批注 · 双击节点文字编辑 · 双击连线删除</div>
     </div>
 
     <div class="canvas-scroll">
@@ -973,11 +973,33 @@
     if (!String(range.toString() || "").trim()) return null;
     const container = range.commonAncestorContainer;
     const element = container.nodeType === Node.TEXT_NODE ? container.parentElement : container;
-    const textEl = element ? element.closest(".node-title, .node-body") : null;
-    if (!textEl) return null;
-    const nodeEl = textEl.closest(".node");
-    if (!nodeEl) return null;
-    return { range, textEl, nodeEl };
+    if (!element) return null;
+    if (element.closest("#annotationDialog, #textToolbar, .note, #edges, .port")) return null;
+
+    const textEl = element.closest(".node-title, .node-body");
+    if (textEl) {
+      const nodeEl = textEl.closest(".node");
+      if (!nodeEl) return null;
+      return {
+        kind: "node",
+        range,
+        textEl,
+        nodeEl,
+        nodeId: nodeEl.dataset.id,
+        field: textEl.dataset.field
+      };
+    }
+
+    const scopeEl = element.closest("[data-anno-scope]");
+    if (scopeEl) {
+      return {
+        kind: "scope",
+        range,
+        scopeEl,
+        scopeId: scopeEl.dataset.annoScope
+      };
+    }
+    return null;
   }
 
   function persistNodeHtml(nodeId) {
@@ -993,6 +1015,75 @@
   function unwrapSpan(span) {
     if (!span || !span.parentNode) return;
     span.replaceWith(...Array.from(span.childNodes));
+  }
+
+  function textOffset(root, node, offset) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let total = 0;
+    let current;
+    while ((current = walker.nextNode())) {
+      if (current === node) return total + offset;
+      total += current.nodeValue.length;
+    }
+    return total;
+  }
+
+  function rangeFromOffsets(root, start, end) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let total = 0;
+    let startNode = null;
+    let startOffset = 0;
+    let endNode = null;
+    let endOffset = 0;
+    let current;
+    while ((current = walker.nextNode())) {
+      const length = current.nodeValue.length;
+      if (!startNode && total + length >= start) {
+        startNode = current;
+        startOffset = Math.max(0, start - total);
+      }
+      if (total + length >= end) {
+        endNode = current;
+        endOffset = Math.max(0, end - total);
+        break;
+      }
+      total += length;
+    }
+    if (!startNode || !endNode) return null;
+    const range = document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    return range;
+  }
+
+  function countOccurrences(text, quote, beforeLength) {
+    const prefix = text.slice(0, Math.max(0, beforeLength));
+    let count = 0;
+    let index = 0;
+    while ((index = prefix.indexOf(quote, index)) !== -1) {
+      count += 1;
+      index += quote.length;
+    }
+    return count;
+  }
+
+  function wrapRange(range, id) {
+    const span = document.createElement("span");
+    span.className = "text-annotation";
+    span.dataset.annotationId = id;
+    try {
+      range.surroundContents(span);
+      return span;
+    } catch (err) {
+      try {
+        const fragment = range.extractContents();
+        span.appendChild(fragment);
+        range.insertNode(span);
+        return span;
+      } catch (err2) {
+        return null;
+      }
+    }
   }
 
   function closeAnnotationDialog(cancel) {
@@ -1016,26 +1107,34 @@
 
   function beginTextAnnotation() {
     if (!pendingSelection) return;
-    const { range, textEl, nodeEl } = pendingSelection;
+    const target = pendingSelection;
+    const { range } = target;
     const quote = String(range.toString() || "").trim();
     if (!quote) return;
-    const span = document.createElement("span");
-    span.className = "text-annotation";
-    span.dataset.annotationId = `ta-${Date.now()}`;
-    try {
-      range.surroundContents(span);
-    } catch (err) {
-      toast("请在同一段文字内选择");
+
+    let occurrence = 0;
+    if (target.kind === "scope") {
+      const start = textOffset(target.scopeEl, range.startContainer, range.startOffset);
+      occurrence = countOccurrences(target.scopeEl.textContent, quote, start);
+    }
+
+    const id = `ta-${Date.now()}`;
+    const span = wrapRange(range, id);
+    if (!span) {
+      toast("这段选择跨了太多元素，换一段再试");
       return;
     }
     hideTextToolbar();
-    persistNodeHtml(nodeEl.dataset.id);
+    if (target.kind === "node") persistNodeHtml(target.nodeId);
     openAnnotationDialog({
       isNew: true,
-      id: span.dataset.annotationId,
-      nodeId: nodeEl.dataset.id,
-      field: textEl.dataset.field,
+      kind: target.kind,
+      id,
+      nodeId: target.kind === "node" ? target.nodeId : null,
+      field: target.kind === "node" ? target.field : null,
+      scopeId: target.kind === "scope" ? target.scopeId : null,
       quote,
+      occurrence,
       comment: "",
       span
     });
@@ -1045,14 +1144,15 @@
     const id = span.dataset.annotationId;
     const annotation = state.textAnnotations.find((entry) => entry.id === id);
     if (!annotation) return;
-    const nodeEl = span.closest(".node");
-    if (!nodeEl) return;
     openAnnotationDialog({
       isNew: false,
+      kind: annotation.kind || "node",
       id,
-      nodeId: nodeEl.dataset.id,
-      field: annotation.field,
+      nodeId: annotation.nodeId || null,
+      field: annotation.field || null,
+      scopeId: annotation.scopeId || null,
       quote: annotation.quote,
+      occurrence: annotation.occurrence || 0,
       comment: annotation.comment,
       span
     });
@@ -1069,16 +1169,21 @@
     if (editingAnnotation.isNew) {
       state.textAnnotations.push({
         id: editingAnnotation.id,
-        nodeId: editingAnnotation.nodeId,
-        field: editingAnnotation.field,
+        kind: editingAnnotation.kind || "node",
+        nodeId: editingAnnotation.nodeId || null,
+        field: editingAnnotation.field || null,
+        scopeId: editingAnnotation.scopeId || null,
         quote: editingAnnotation.quote,
+        occurrence: editingAnnotation.occurrence || 0,
         comment
       });
     } else {
       const existing = state.textAnnotations.find((entry) => entry.id === editingAnnotation.id);
       if (existing) existing.comment = comment;
     }
-    persistNodeHtml(editingAnnotation.nodeId);
+    if ((editingAnnotation.kind || "node") === "node") {
+      persistNodeHtml(editingAnnotation.nodeId);
+    }
     annotationDialog.classList.remove("show");
     editingAnnotation = null;
     updateCounts();
@@ -1087,12 +1192,12 @@
 
   function deleteTextAnnotation() {
     if (!editingAnnotation) return;
-    const { id, span, nodeId, isNew } = editingAnnotation;
+    const { id, span, nodeId, kind, isNew } = editingAnnotation;
     if (!isNew) {
       state.textAnnotations = state.textAnnotations.filter((entry) => entry.id !== id);
     }
     unwrapSpan(span);
-    persistNodeHtml(nodeId);
+    if ((kind || "node") === "node") persistNodeHtml(nodeId);
     annotationDialog.classList.remove("show");
     editingAnnotation = null;
     updateCounts();
@@ -1194,11 +1299,34 @@
     `).join("");
   }
 
+  function restoreScopeAnnotations() {
+    document.querySelectorAll("[data-anno-scope] .text-annotation").forEach((span) => unwrapSpan(span));
+    for (const annotation of state.textAnnotations) {
+      if ((annotation.kind || "node") !== "scope") continue;
+      const scope = document.querySelector(`[data-anno-scope="${annotation.scopeId}"]`);
+      if (!scope) continue;
+      if (scope.querySelector(`.text-annotation[data-annotation-id="${annotation.id}"]`)) continue;
+      const text = scope.textContent || "";
+      const quote = annotation.quote || "";
+      if (!quote) continue;
+      let index = -1;
+      let occurrence = -1;
+      while ((index = text.indexOf(quote, index + 1)) !== -1) {
+        occurrence += 1;
+        if (occurrence === (annotation.occurrence || 0)) break;
+      }
+      if (index < 0) continue;
+      const range = rangeFromOffsets(scope, index, index + quote.length);
+      if (range) wrapRange(range, annotation.id);
+    }
+  }
+
   function renderAll() {
     renderGroups();
     renderNodes();
     renderEdges();
     renderNotes();
+    restoreScopeAnnotations();
     updateCounts();
   }
 
@@ -1507,6 +1635,13 @@
       event.stopPropagation();
       openExistingAnnotation(annotation);
     }
+  });
+
+  document.addEventListener("click", (event) => {
+    const annotation = event.target.closest(".text-annotation");
+    if (!annotation || annotation.closest(".node")) return;
+    event.stopPropagation();
+    openExistingAnnotation(annotation);
   });
 
   // Notes editing / deletion
